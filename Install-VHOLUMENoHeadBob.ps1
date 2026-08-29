@@ -10,7 +10,6 @@ $modName = 'NoHeadBob'
 $scriptRoot = $PSScriptRoot
 $modSource = Join-Path $scriptRoot "Mods\$modName"
 $manifestName = '.NoHeadBob-install.json'
-$coreFiles = @('UE4SS.dll', 'dwmapi.dll', 'UE4SS-settings.ini')
 $releaseApi = 'https://api.github.com/repos/UE4SS-RE/RE-UE4SS/releases/tags/experimental-latest'
 
 function Resolve-GameDirectory {
@@ -20,8 +19,8 @@ function Resolve-GameDirectory {
         $Candidate = Read-Host 'Paste the VHOLUME install root (the folder containing VHOLUME.exe and the VHOLUME folder)'
     }
 
-    $resolved = (Resolve-Path -LiteralPath $Candidate).Path
-    $gameDirectory = Join-Path $resolved 'VHOLUME\Binaries\Win64'
+    $root = (Resolve-Path -LiteralPath $Candidate).Path
+    $gameDirectory = Join-Path $root 'VHOLUME\Binaries\Win64'
     $gameExe = Join-Path $gameDirectory 'VHOLUME-Win64-Shipping.exe'
 
     if (-not (Test-Path -LiteralPath $gameExe -PathType Leaf)) {
@@ -33,9 +32,6 @@ function Resolve-GameDirectory {
 
 function Enable-Mod {
     param([string]$ModsFile)
-
-    $modsDirectory = Split-Path -Parent $ModsFile
-    New-Item -ItemType Directory -Path $modsDirectory -Force | Out-Null
 
     $lines = if (Test-Path -LiteralPath $ModsFile) {
         @(Get-Content -LiteralPath $ModsFile)
@@ -65,7 +61,8 @@ if (-not (Test-Path -LiteralPath $modSource -PathType Container)) {
 }
 
 $target = Resolve-GameDirectory $GameDirectory
-$modsFile = Join-Path $target 'Mods\mods.txt'
+$ue4ssRoot = Join-Path $target 'ue4ss'
+$modsFile = Join-Path $ue4ssRoot 'Mods\mods.txt'
 $manifestPath = Join-Path $target $manifestName
 $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("VHOLUME-NoHeadBob-" + [guid]::NewGuid().ToString())
 
@@ -92,37 +89,48 @@ try {
         }
     }
 
+    # UE4SS's current basic archive intentionally has this layout:
+    # Win64\dwmapi.dll (proxy) and Win64\ue4ss\Mods (working directory).
     $backupPath = Join-Path $target ('.NoHeadBob-UE4SS-backup\' + (Get-Date -Format 'yyyyMMdd-HHmmss'))
-    $backedUpCoreFiles = @()
+    $hadProxy = Test-Path -LiteralPath (Join-Path $target 'dwmapi.dll') -PathType Leaf
+    $hadUE4SSRoot = Test-Path -LiteralPath $ue4ssRoot -PathType Container
 
-    foreach ($file in $coreFiles) {
-        $source = Join-Path $target $file
-        if (Test-Path -LiteralPath $source -PathType Leaf) {
-            New-Item -ItemType Directory -Path $backupPath -Force | Out-Null
-            Copy-Item -LiteralPath $source -Destination (Join-Path $backupPath $file) -Force
-            $backedUpCoreFiles += $file
+    if ($hadProxy -or $hadUE4SSRoot) {
+        New-Item -ItemType Directory -Path $backupPath -Force | Out-Null
+        if ($hadProxy) {
+            Copy-Item -LiteralPath (Join-Path $target 'dwmapi.dll') -Destination (Join-Path $backupPath 'dwmapi.dll') -Force
+        }
+        if ($hadUE4SSRoot) {
+            Copy-Item -LiteralPath $ue4ssRoot -Destination (Join-Path $backupPath 'ue4ss') -Recurse -Force
         }
     }
 
-    # Preserve a pre-existing mod list so the UE4SS extraction cannot overwrite it.
+    # Preserve an existing mod list even when UE4SS itself is being updated.
     $savedModsFile = Join-Path $tempRoot 'mods.txt.before-install'
     $hadModsFile = Test-Path -LiteralPath $modsFile -PathType Leaf
     if ($hadModsFile) {
         Copy-Item -LiteralPath $modsFile -Destination $savedModsFile -Force
     }
 
-    Write-Host 'Installing normal UE4SS experimental files...'
+    Write-Host 'Installing UE4SS into Win64\ue4ss and its proxy into Win64...'
     Expand-Archive -LiteralPath $archive -DestinationPath $target -Force
 
     if ($hadModsFile) {
         Copy-Item -LiteralPath $savedModsFile -Destination $modsFile -Force
     }
 
-    $targetMod = Join-Path $target "Mods\$modName"
+    if (-not (Test-Path -LiteralPath (Join-Path $ue4ssRoot 'UE4SS.dll') -PathType Leaf)) {
+        throw 'UE4SS extraction did not produce Win64\ue4ss\UE4SS.dll as expected.'
+    }
+    if (-not (Test-Path -LiteralPath (Join-Path $target 'dwmapi.dll') -PathType Leaf)) {
+        throw 'UE4SS extraction did not produce Win64\dwmapi.dll as expected.'
+    }
+
+    $targetMod = Join-Path $ue4ssRoot "Mods\$modName"
     if (Test-Path -LiteralPath $targetMod) {
         Remove-Item -LiteralPath $targetMod -Recurse -Force
     }
-    Copy-Item -LiteralPath $modSource -Destination (Join-Path $target 'Mods') -Recurse -Force
+    Copy-Item -LiteralPath $modSource -Destination (Join-Path $ue4ssRoot 'Mods') -Recurse -Force
     Enable-Mod $modsFile
 
     $manifest = [ordered]@{
@@ -130,16 +138,16 @@ try {
         InstalledAt = (Get-Date).ToString('o')
         UE4SSAsset = $asset.name
         UE4SSDigest = $asset.digest
-        CoreFiles = $coreFiles
         BackupPath = $backupPath
-        BackedUpCoreFiles = $backedUpCoreFiles
+        HadProxy = $hadProxy
+        HadUE4SSRoot = $hadUE4SSRoot
     }
     $manifest | ConvertTo-Json | Set-Content -LiteralPath $manifestPath -Encoding UTF8
 
     Write-Host ''
     Write-Host 'Installed successfully.' -ForegroundColor Green
-    Write-Host "Game directory: $target"
-    Write-Host 'Start VHOLUME and enter a level. Check UE4SS.log for: [NoHeadBob] NoHeadBob successfully applied'
+    Write-Host "UE4SS root: $ue4ssRoot"
+    Write-Host 'Start VHOLUME and enter a level. Check ue4ss\UE4SS.log for: [NoHeadBob] NoHeadBob successfully applied'
 }
 finally {
     if (Test-Path -LiteralPath $tempRoot) {

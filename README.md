@@ -2,18 +2,27 @@
 
 This mod disables the **vertical bob** and **roll sway** configured by VHOLUME's `CameraShake_Run` default object. It does not disable landing, mantle, ledge-grab, zipline, or fall camera shakes.
 
-NOTE: This will invalidate any runs completed with this mod, thus they will not appear on the leaderboard.
+> **Note:** Runs completed with this mod are invalidated and will not appear on the leaderboard.
 
 ## Requirements
 
 - A Windows copy of VHOLUME.
-- (If doing manual install) The latest [experimental UE4SS](https://github.com/UE4SS-RE/RE-UE4SS/releases/tag/experimental-latest) (the normal, non-zDEV package) installed into VHOLUME's real executable directory:
+- For a manual install: the latest [experimental UE4SS](https://github.com/UE4SS-RE/RE-UE4SS/releases/tag/experimental-latest) **normal/non-zDEV** package.
 
-  ```text
-  <Steam library>\steamapps\common\VHOLUME\VHOLUME\Binaries\Win64\
-  ```
+The current normal UE4SS archive layout is:
 
-  That directory must contain `VHOLUME-Win64-Shipping.exe`, `UE4SS.dll`, and a `Mods` directory.
+```text
+<Steam library>\steamapps\common\VHOLUME\VHOLUME\Binaries\Win64\
+├── VHOLUME-Win64-Shipping.exe
+├── dwmapi.dll
+└── ue4ss\
+    ├── UE4SS.dll
+    ├── UE4SS-settings.ini
+    └── Mods\
+        └── mods.txt
+```
+
+`zDEV-UE4SS` is only needed for development tools such as Live View, object dumps, and the GUI debugger. The normal UE4SS package is sufficient for using this mod.
 
 ## Automated install (recommended)
 
@@ -24,43 +33,68 @@ NOTE: This will invalidate any runs completed with this mod, thus they will not 
    <Steam library>\steamapps\common\VHOLUME
    ```
 
-The command wrapper starts PowerShell with `-ExecutionPolicy Bypass` **only for that one installer process**; it does not change the computer's saved execution-policy setting. It is included because scripts delivered from the internet or chat applications are often blocked by Windows policy.
+The installer downloads the newest normal UE4SS experimental build from the official GitHub release, verifies its published SHA-256 digest when available, preserves an existing `ue4ss\Mods\mods.txt`, and enables `NoHeadBob`.
 
-If the friend prefers not to use that one-process bypass, they can right-click each `.ps1` file → **Properties** → **Unblock**, then run `Install-VHOLUMENoHeadBob.ps1` from an already permitted PowerShell session instead.
+The command wrapper uses `-ExecutionPolicy Bypass` only for that one PowerShell process; it does not change the computer's saved execution-policy setting. If preferred, unblock the `.ps1` files via **Properties → Unblock** and run the PowerShell scripts from an already permitted session instead.
 
-The installer downloads the newest **normal UE4SS experimental** build from the official GitHub release, verifies its published SHA-256 digest when present, preserves an existing `Mods\mods.txt`, enables `NoHeadBob`, and stores a small uninstall manifest.
+## Uninstall
 
-To remove only this mod, double-click `Uninstall-VHOLUMENoHeadBob.cmd`.
+### Remove the mod and UE4SS (default)
 
-To remove the mod **and** the UE4SS core files installed by this package, open a Command Prompt in the extracted package directory and run:
+Double-click:
 
 ```text
-Uninstall-VHOLUMENoHeadBob.cmd -RemoveUE4SS
+Uninstall-VHOLUMENoHeadBob.cmd
 ```
+
+The script asks for confirmation before removing:
+
+```text
+Win64\ue4ss
+Win64\dwmapi.dll
+```
+
+It restores a pre-install UE4SS backup if one existed.
+
+### Remove only the mod and preserve UE4SS
+
+Open Command Prompt in the extracted package folder and run:
+
+```text
+Uninstall-VHOLUMENoHeadBob.cmd -KeepUE4SS
+```
+
+The `-KeepUE4SS` flag removes the `NoHeadBob` folder and its `mods.txt` entry, but leaves the existing UE4SS installation in place.
 
 ## Manual install
 
-1. Extract this ZIP **into the `Win64` directory** above, preserving folders. It should create:
+1. Extract the normal UE4SS archive into:
 
    ```text
-   Win64\Mods\NoHeadBob\scripts\main.lua
+   <Steam library>\steamapps\common\VHOLUME\VHOLUME\Binaries\Win64
    ```
 
-2. Open:
+2. Copy the packaged `Mods\NoHeadBob` folder to:
 
    ```text
-   Win64\Mods\mods.txt
+   Win64\ue4ss\Mods\NoHeadBob
    ```
 
-3. Add this line exactly once (do not overwrite the existing file):
+3. Open:
+
+   ```text
+   Win64\ue4ss\Mods\mods.txt
+   ```
+
+4. Add this line exactly once (do not overwrite the file):
 
    ```text
    NoHeadBob : 1
    ```
 
-4. Start VHOLUME and enter a level.
+5. Start VHOLUME and enter a level.
 
-5. In the UE4SS console, confirm this message appears:
+6. Confirm this line appears in `Win64\ue4ss\UE4SS.log`:
 
    ```text
    [NoHeadBob] NoHeadBob successfully applied
@@ -68,22 +102,26 @@ Uninstall-VHOLUMENoHeadBob.cmd -RemoveUE4SS
 
 ## Verify
 
-Run normally. The rhythmic vertical run bob and roll sway should be gone. Other movement camera effects should remain.
+Run normally. The rhythmic vertical run bob and roll sway should be gone, while the other movement-camera effects should remain.
 
-## Uninstall
+## Manual mod-only removal
 
-1. Remove or change this entry in `Mods\mods.txt`:
+1. Remove or change this line in `ue4ss\Mods\mods.txt`:
 
    ```text
    NoHeadBob : 1
    ```
 
-   To disable without deleting, change `1` to `0`.
+   Change `1` to `0` to disable it without deletion.
 
-2. Delete `Win64\Mods\NoHeadBob` if desired.
+2. Delete:
+
+   ```text
+   Win64\ue4ss\Mods\NoHeadBob
+   ```
 
 ## Notes
 
 - This modifies memory at runtime only; it does not alter VHOLUME's `.pak` files.
-- The normal UE4SS package is sufficient for using this mod. `zDEV-UE4SS` is only needed for development tools such as Live View, object dumps, and the GUI debugger.
-- If the mod never reports success after entering a level, inspect `UE4SS.log`, then test the current experimental UE4SS build before trying a different configuration.
+- Test in single-player/offline first.
+- If the mod never reports success after entering a level, inspect `Win64\ue4ss\UE4SS.log` and ensure the current experimental normal UE4SS build is installed.
