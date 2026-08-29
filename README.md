@@ -94,11 +94,19 @@ The `-KeepUE4SS` flag removes the `NoHeadBob` folder and its `mods.txt` entry, b
 
 5. Start VHOLUME and enter a level.
 
-6. Confirm this line appears in `Win64\ue4ss\UE4SS.log`:
+6. Verify the mod through the UE4SS log:
+
+   ```text
+   Win64\ue4ss\UE4SS.log
+   ```
+
+   Open that file in Notepad after entering a level, then search for:
 
    ```text
    [NoHeadBob] NoHeadBob successfully applied
    ```
+
+   If using `zDEV-UE4SS` instead of the normal package, open its GUI with `Ctrl+O` (when the GUI console is enabled) and use the **Console** tab to see the same output live.
 
 ## Verify
 
