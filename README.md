@@ -17,30 +17,25 @@ NOTE: This will invalidate any runs completed with this mod, thus they will not 
 
 ## Automated install (recommended)
 
-Open **PowerShell** in the extracted package folder and run:
+1. Double-click `Install-VHOLUMENoHeadBob.cmd`.
+2. When prompted, paste the **VHOLUME install root**—the folder containing `VHOLUME.exe` and the inner `VHOLUME` folder:
 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\Install-VHOLUMENoHeadBob.ps1
-```
+   ```text
+   <Steam library>\steamapps\common\VHOLUME
+   ```
 
-When prompted, paste the folder containing `VHOLUME-Win64-Shipping.exe`:
+The command wrapper starts PowerShell with `-ExecutionPolicy Bypass` **only for that one installer process**; it does not change the computer's saved execution-policy setting. It is included because scripts delivered from the internet or chat applications are often blocked by Windows policy.
+
+If the friend prefers not to use that one-process bypass, they can right-click each `.ps1` file → **Properties** → **Unblock**, then run `Install-VHOLUMENoHeadBob.ps1` from an already permitted PowerShell session instead.
+
+The installer downloads the newest **normal UE4SS experimental** build from the official GitHub release, verifies its published SHA-256 digest when present, preserves an existing `Mods\mods.txt`, enables `NoHeadBob`, and stores a small uninstall manifest.
+
+To remove only this mod, double-click `Uninstall-VHOLUMENoHeadBob.cmd`.
+
+To remove the mod **and** the UE4SS core files installed by this package, open a Command Prompt in the extracted package directory and run:
 
 ```text
-<Steam library>\steamapps\common\VHOLUME\VHOLUME\Binaries\Win64
-```
-
-The installer downloads the latest **UE4SS experimental** build from the official GitHub release, verifies its published SHA-256 digest when present, preserves an existing `Mods\mods.txt`, enables `NoHeadBob`, and stores a small uninstall manifest.
-
-To remove only this mod:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\Uninstall-VHOLUMENoHeadBob.ps1
-```
-
-To remove the mod **and** the UE4SS core files installed by this package (restoring any core files backed up at installation):
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\Uninstall-VHOLUMENoHeadBob.ps1 -RemoveUE4SS
+Uninstall-VHOLUMENoHeadBob.cmd -RemoveUE4SS
 ```
 
 ## Manual install

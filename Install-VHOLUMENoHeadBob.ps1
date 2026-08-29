@@ -17,17 +17,18 @@ function Resolve-GameDirectory {
     param([string]$Candidate)
 
     if ([string]::IsNullOrWhiteSpace($Candidate)) {
-        $Candidate = Read-Host 'Paste the folder containing VHOLUME-Win64-Shipping.exe'
+        $Candidate = Read-Host 'Paste the VHOLUME install root (the folder containing VHOLUME.exe and the VHOLUME folder)'
     }
 
     $resolved = (Resolve-Path -LiteralPath $Candidate).Path
-    $gameExe = Join-Path $resolved 'VHOLUME-Win64-Shipping.exe'
+    $gameDirectory = Join-Path $resolved 'VHOLUME\Binaries\Win64'
+    $gameExe = Join-Path $gameDirectory 'VHOLUME-Win64-Shipping.exe'
 
     if (-not (Test-Path -LiteralPath $gameExe -PathType Leaf)) {
-        throw "Game executable not found: $gameExe`nChoose the game's VHOLUME\Binaries\Win64 folder."
+        throw "Game executable not found: $gameExe`nChoose the VHOLUME install root, not its Binaries\\Win64 subfolder."
     }
 
-    return $resolved
+    return $gameDirectory
 }
 
 function Enable-Mod {
