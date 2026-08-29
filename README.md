@@ -2,10 +2,12 @@
 
 This mod disables the **vertical bob** and **roll sway** configured by VHOLUME's `CameraShake_Run` default object. It does not disable landing, mantle, ledge-grab, zipline, or fall camera shakes.
 
+NOTE: This will invalidate any runs completed with this mod, thus they will not appear on the leaderboard.
+
 ## Requirements
 
 - A Windows copy of VHOLUME.
-- (If doing manual install) The latest **experimental UE4SS** (the normal, non-zDEV package) installed into VHOLUME's real executable directory:
+- (If doing manual install) The latest [experimental UE4SS](https://github.com/UE4SS-RE/RE-UE4SS/releases/tag/experimental-latest) (the normal, non-zDEV package) installed into VHOLUME's real executable directory:
 
   ```text
   <Steam library>\steamapps\common\VHOLUME\VHOLUME\Binaries\Win64\
@@ -27,7 +29,7 @@ When prompted, paste the folder containing `VHOLUME-Win64-Shipping.exe`:
 <Steam library>\steamapps\common\VHOLUME\VHOLUME\Binaries\Win64
 ```
 
-The installer downloads the newest **normal UE4SS experimental** build from the official GitHub release, verifies its published SHA-256 digest when present, preserves an existing `Mods\mods.txt`, enables `NoHeadBob`, and stores a small uninstall manifest.
+The installer downloads the latest **UE4SS experimental** build from the official GitHub release, verifies its published SHA-256 digest when present, preserves an existing `Mods\mods.txt`, enables `NoHeadBob`, and stores a small uninstall manifest.
 
 To remove only this mod:
 
@@ -88,6 +90,5 @@ Run normally. The rhythmic vertical run bob and roll sway should be gone. Other 
 ## Notes
 
 - This modifies memory at runtime only; it does not alter VHOLUME's `.pak` files.
-- Test in single-player/offline first. Steam Offline Mode is recommended while using a new UE4SS setup.
 - The normal UE4SS package is sufficient for using this mod. `zDEV-UE4SS` is only needed for development tools such as Live View, object dumps, and the GUI debugger.
 - If the mod never reports success after entering a level, inspect `UE4SS.log`, then test the current experimental UE4SS build before trying a different configuration.
