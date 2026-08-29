@@ -1,3 +1,6 @@
+-- VHOLUME No Head Bob (run shake only)
+-- Requires UE4SS / zDEV-UE4SS.
+
 print("[NoHeadBob] Loaded\n")
 
 local RUN_SHAKE_DEFAULT =
@@ -34,6 +37,7 @@ local function apply_no_head_bob()
     end
 end
 
+-- The class default may load only after entering a level; retry until found.
 LoopAsync(250, function()
     ExecuteInGameThread(apply_no_head_bob)
     return applied
