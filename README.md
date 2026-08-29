@@ -26,7 +26,7 @@ The current normal UE4SS archive layout is:
 
 ## Automated install (recommended)
 
-1. Download the latest [release zip](https://github.com/the-color-cyan/NoHeadBob/releases) and extract it.
+1. Download the latest [release zip](https://github.com/the-color-cyan/NoHeadBob/releases) or [repo zip](https://github.com/the-color-cyan/NoHeadBob/archive/refs/heads/main.zip) and extract it.
 1. Double-click `Install-VHOLUMENoHeadBob.cmd`.
 2. When prompted, paste the **VHOLUME install root**—the folder containing `VHOLUME.exe` and the inner `VHOLUME` folder:
 
