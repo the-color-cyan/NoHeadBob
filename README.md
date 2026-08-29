@@ -5,7 +5,7 @@ This mod disables the **vertical bob** and **roll sway** configured by VHOLUME's
 ## Requirements
 
 - A Windows copy of VHOLUME.
-- The latest **experimental UE4SS** (the normal, non-zDEV package) installed into VHOLUME's real executable directory:
+- (If doing manual install) The latest **experimental UE4SS** (the normal, non-zDEV package) installed into VHOLUME's real executable directory:
 
   ```text
   <Steam library>\steamapps\common\VHOLUME\VHOLUME\Binaries\Win64\
